@@ -1,0 +1,44 @@
+name: Sync Status and Labels
+
+on:
+  issues:
+    types:
+      - edited
+
+jobs:
+  sync-status-and-labels:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check if label or status is changed
+      id: check-changes
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const labelChanged = github.event.changes?.issue?.labels;
+          const statusChanged = github.event.changes?.issue?.status;
+          console.log(`Label changed: ${labelChanged}`);
+          console.log(`Status changed: ${statusChanged}`);
+          if (labelChanged || statusChanged) {
+            core.setOutput('labelChanged', labelChanged ? 'true' : 'false');
+            core.setOutput('statusChanged', statusChanged ? 'true' : 'false');
+          }
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Sync label and/or status to other project
+      run: |
+        if [ "${{ steps.check-changes.outputs.labelChanged }}" == "true" ]; then
+          # Insérez ici le code pour synchroniser les labels entre les projets
+          # Utilisez l'API GitHub, par exemple, pour mettre à jour les labels dans l'autre projet.
+          # Assurez-vous d'utiliser le token d'accès approprié.
+          echo "Labels changed. Sync labels here."
+        fi
+
+        if [ "${{ steps.check-changes.outputs.statusChanged }}" == "true" ]; then
+          # Insérez ici le code pour synchroniser le statut entre les projets
+          # Utilisez l'API GitHub, par exemple, pour mettre à jour le statut dans l'autre projet.
+          # Assurez-vous d'utiliser le token d'accès approprié.
+          echo "Status changed. Sync status here."
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
